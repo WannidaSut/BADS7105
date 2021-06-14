@@ -1,0 +1,21 @@
+CREATE OR REPLACE MODEL `velvety-ring-271807.Supermarket_dataset.mo`
+OPTIONS(model_type='kmeans',num_clusters=5)
+AS(
+  SELECT
+    SUM(SPEND) AS TOTAL_SPEND,
+    AVG(SPEND) AS AVG_BASKET_SPEND,
+    SUM(SPEND)/COUNT(DISTINCT SHOP_DATE) AS AVG_DATE_SPEND,
+    MAX(PURCHASE_DATE) - MIN(PURCHASE_DATE) AS LENGHT_PURCHASE_DATE
+  FROM (
+    SELECT
+      CUST_CODE,
+      BASKET_ID,
+      SPEND,
+      SHOP_DATE,
+      DATE_DIFF (DATE'2008-07-06', PARSE_DATE('%Y%m%d', CAST(SHOP_DATE AS STRING)), DAY) AS PURCHASE_DATE
+    FROM
+      `velvety-ring-271807.Supermarket_dataset.Supermarket_table` )
+  WHERE
+    CUST_CODE IS NOT NULL
+  GROUP BY
+    CUST_CODE )
