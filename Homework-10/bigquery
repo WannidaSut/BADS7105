@@ -1,0 +1,32 @@
+WITH supermarket_data AS 
+(SELECT  distinct cust_code,
+DATE_TRUNC(PARSE_DATE("%Y%m%d", CAST(SHOP_DATE AS STRING)), Month) AS month,
+FROM `velvety-ring-271807.Supermarket_dataset.Supermarket_table`),
+
+customer_month AS 
+(SELECT cust_code, month, LAG(month,1) OVER (PARTITION BY cust_code ORDER BY month) AS last_month 
+FROM supermarket_data),
+
+data1 AS 
+(SELECT cust_code, month, last_month,
+CASE WHEN DATE_DIFF (month, last_month, MONTH) = 1 THEN 'CUST_REPEAT' 
+    WHEN DATE_DIFF(month, last_month, MONTH) > 1 THEN 'CUST_REACTIVATED'
+    WHEN DATE_DIFF(month, last_month, MONTH) IS NULL THEN 'CUST_NEW' End AS Status
+FROM customer_month),
+
+data2 AS
+(SELECT cust_code, month, DATE_ADD(month, INTERVAL 1 MONTH) AS Next_month,
+CASE WHEN month <= (SELECT MAX(month) FROM supermarket_data) then 'CUST_CHURN' end AS status 
+
+FROM (SELECT cust_code, month, ROW_NUMBER() OVER ( PARTITION BY cust_code ORDER BY month DESC ) AS rwn
+FROM supermarket_data) t WHERE rwn = 1)
+
+SELECT month, status, count(Cust_code) FROM(
+SELECT cust_code, month, status 
+FROM data1
+
+UNION ALL 
+SELECT cust_code, Next_month, status
+FROM  data2 WHERE Next_month <= (SELECT MAX(month) FROM supermarket_data))
+
+GROUP BY month, status
