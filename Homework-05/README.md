@@ -1,6 +1,7 @@
 POWER BI
 
 
-<img width="595" alt="22" src="https://user-images.githubusercontent.com/77845973/122281637-acc7c180-cf14-11eb-89d5-858e813072bb.PNG">
+<img width="596" alt="22" src="https://user-images.githubusercontent.com/77845973/122283240-8acf3e80-cf16-11eb-8c86-08c40964c858.PNG">
+
 
 
